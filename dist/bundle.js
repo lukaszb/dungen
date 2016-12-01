@@ -8184,16 +8184,18 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var INIT_LIVE_THRESHOLD = 0.8;
+	var INIT_LIVE_THRESHOLD = 0.45;
 	var ALIVE = 1;
 	var DEAD = 0;
 	var WIDTH = 800;
 	var HEIGHT = 600;
-	var CELL_SIZE = 20;
+	var CELL_SIZE = 10;
 	var COLUMNS = Math.floor(WIDTH / CELL_SIZE);
 	var ROWS = Math.floor(HEIGHT / CELL_SIZE);
 	var FPS = 120;
 	var MAX_GENERATIONS = 12;
+	var BIRTH_THRESHOLD = 5;
+	var SURVIVAL_THRESHOLD = 5;
 	
 	var Board = function () {
 	  function Board(columns, rows) {
@@ -8254,7 +8256,6 @@
 	  var gray = 0;
 	  var board = new Board(COLUMNS, ROWS);
 	  var nextBoard = new Board(COLUMNS, ROWS);
-	  var generation;
 	
 	  p.setup = function () {
 	    p.frameRate(FPS);
@@ -8262,20 +8263,28 @@
 	    init(board, nextBoard);
 	  };
 	
-	  p.draw = function () {
-	    generation++;
-	    if (MAX_GENERATIONS && generation >= MAX_GENERATIONS) {
-	      return;
+	  function init(board, nextBoard) {
+	    for (var x = 0; x < board.columns; x++) {
+	      for (var y = 0; y < board.rows; y++) {
+	        var live = Math.random() >= INIT_LIVE_THRESHOLD ? ALIVE : DEAD;
+	        board.set(x, y, live);
+	        nextBoard.set(x, y, DEAD);
+	      }
 	    }
+	    for (var gen = 0; gen < MAX_GENERATIONS; gen++) {
+	      computeNextGeneration(board, nextBoard);
+	    }
+	  }
 	
+	  p.draw = function () {
 	    p.background(255);
-	    computeNextGeneration(board, nextBoard);
+	    //computeNextGeneration(board, nextBoard)
 	    for (var x = 0; x < board.columns; x++) {
 	      for (var y = 0; y < board.rows; y++) {
 	        if (board.get(x, y) === ALIVE) {
-	          p.fill(0);
-	        } else {
 	          p.fill(255);
+	        } else {
+	          p.fill(0);
 	        }
 	        p.rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 1, CELL_SIZE - 1);
 	      }
@@ -8285,18 +8294,6 @@
 	  p.mousePressed = function () {
 	    init(board, nextBoard);
 	  };
-	
-	  function init(board, nextBoard) {
-	    generation = 0;
-	
-	    for (var x = 0; x < board.columns; x++) {
-	      for (var y = 0; y < board.rows; y++) {
-	        var live = Math.random() >= INIT_LIVE_THRESHOLD ? ALIVE : DEAD;
-	        board.set(x, y, live);
-	        nextBoard.set(x, y, DEAD);
-	      }
-	    }
-	  }
 	};
 	
 	// See https://github.com/processing/p5.js/wiki/Instantiation-Cases
@@ -8307,20 +8304,31 @@
 	  for (var x = 0; x < board.columns; x++) {
 	    for (var y = 0; y < board.rows; y++) {
 	      var state = board.get(x, y);
+	      var nextState = ALIVE;
 	      var aliveNeighbours = board.getAliveNeighbours(x, y);
-	      if (state === ALIVE) {
-	        if (aliveNeighbours >= 2 && aliveNeighbours <= 3) {
-	          nextBoard.set(x, y, ALIVE);
-	        } else {
-	          nextBoard.set(x, y, DEAD);
-	        }
+	      // Simple dungeon generator
+	      if (state === ALIVE && aliveNeighbours >= SURVIVAL_THRESHOLD) {
+	        nextBoard.set(x, y, ALIVE);
+	      } else if (state === DEAD && aliveNeighbours >= BIRTH_THRESHOLD) {
+	        nextBoard.set(x, y, ALIVE);
 	      } else {
-	        if (aliveNeighbours === 3) {
-	          nextBoard.set(x, y, ALIVE);
-	        } else {
-	          nextBoard.set(x, y, DEAD);
-	        }
+	        nextBoard.set(x, y, DEAD);
 	      }
+	
+	      // Conway's Game of Life
+	      //if (state === ALIVE) {
+	      //if (aliveNeighbours >= 2 && aliveNeighbours <= 3) {
+	      //nextBoard.set(x, y, ALIVE)
+	      //} else {
+	      //nextBoard.set(x, y, DEAD)
+	      //}
+	      //} else {
+	      //if (aliveNeighbours === 3) {
+	      //nextBoard.set(x, y, ALIVE)
+	      //} else {
+	      //nextBoard.set(x, y, DEAD)
+	      //}
+	      //}
 	    }
 	  }
 	  var temp = board.table;
