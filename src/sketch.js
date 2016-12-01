@@ -6,7 +6,8 @@ const HEIGHT = 600
 const CELL_SIZE = 20
 const COLUMNS = Math.floor(WIDTH / CELL_SIZE)
 const ROWS = Math.floor(HEIGHT / CELL_SIZE)
-const FPS = 60
+const FPS = 120
+const MAX_GENERATIONS = 12
 
 
 class Board {
@@ -55,6 +56,7 @@ const dungen = (p) => {
   let gray = 0
   let board = new Board(COLUMNS, ROWS)
   let nextBoard = new Board(COLUMNS, ROWS)
+  var generation
 
   p.setup = function () {
     p.frameRate(FPS)
@@ -63,6 +65,11 @@ const dungen = (p) => {
   }
 
   p.draw = function () {
+    generation++
+    if (MAX_GENERATIONS && generation >= MAX_GENERATIONS) {
+      return
+    }
+
     p.background(255)
     computeNextGeneration(board, nextBoard)
     for (var x=0; x < board.columns; x++) {
@@ -80,21 +87,25 @@ const dungen = (p) => {
   p.mousePressed = function () {
     init(board, nextBoard);
   }
+
+  function init(board, nextBoard) {
+    generation = 0
+
+    for (var x=0; x < board.columns; x++) {
+      for (var y=0; y < board.rows; y++) {
+        let live = (Math.random() >= INIT_LIVE_THRESHOLD) ? ALIVE : DEAD
+        board.set(x, y, live)
+        nextBoard.set(x, y, DEAD)
+      }
+    }
+  }
+
 }
 
 // See https://github.com/processing/p5.js/wiki/Instantiation-Cases
 new p5(dungen);  // 2nd param can be a canvas html element
 
-function init(board, nextBoard) {
 
-  for (var x=0; x < board.columns; x++) {
-    for (var y=0; y < board.rows; y++) {
-      let live = (Math.random() >= INIT_LIVE_THRESHOLD) ? ALIVE : DEAD
-      board.set(x, y, live)
-      nextBoard.set(x, y, DEAD)
-    }
-  }
-}
 
 
 function computeNextGeneration(board, nextBoard) {
