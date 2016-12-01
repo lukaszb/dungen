@@ -1,3 +1,9 @@
+/*
+ * Links
+ * http://blog.jrheard.com/procedural-dungeon-generation-cellular-automata
+ * http://www.gridsagegames.com/blog/2014/06/mapgen-cellular-automata/
+ *
+ */
 const INIT_LIVE_THRESHOLD = 0.45
 const ALIVE = 1
 const DEAD = 0

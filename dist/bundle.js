@@ -8184,6 +8184,12 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
+	/*
+	 * Links
+	 * http://blog.jrheard.com/procedural-dungeon-generation-cellular-automata
+	 * http://www.gridsagegames.com/blog/2014/06/mapgen-cellular-automata/
+	 *
+	 */
 	var INIT_LIVE_THRESHOLD = 0.45;
 	var ALIVE = 1;
 	var DEAD = 0;
